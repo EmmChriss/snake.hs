@@ -1,6 +1,8 @@
+{-# LANGUAGE NamedFieldPuns #-}
+
 module Snake where
 
-import Data.Map as Map
+import Data.List
 import System.Random
 
 data Dir = UP | DOWN | LEFT | RIGHT deriving (Eq, Ord)
@@ -14,12 +16,11 @@ data State = RUNNING | WIN | LOST deriving (Eq)
 
 data GameState = GameState
   { snake :: Snake
-  , dir :: Direction
+  , dir :: Dir
   , food :: Pos
   , level :: Grid
   , rand :: StdGen
   , state :: State
-  , remainingCells :: Int
   }
 
 getCell :: Grid -> Pos -> Cell
@@ -39,17 +40,7 @@ initialGameState level snake dir
     , level = level
     , rand = mkStdGen 100
     , state = RUNNING
-    , remainingCells = countFree - length snake
     }
-  where
-    countFree = sum $ map
-      (\row -> sum $ map
-        (\cell ->
-          if cell == FREE
-          then 1
-          else 0
-          )
-        ) level
 
 dirToVec :: Dir -> Pos
 dirToVec UP = (0, (-1))
@@ -77,22 +68,20 @@ move gameState@GameState { snake, dir, food, level }
     longSnake = newHead : snake
 
 generateFood :: GameState -> GameState
-generateFood gameState@GameState { rand, remainingCells }
-  | remainingCells == 0 = gameState
-  | otherwise = gameState
+generateFood gameState@GameState { rand, level, snake }
+  | len == 0 = gameState { rand = rand1, food = ((-1), (-1)), state = WIN }
+  | otherwise = gameState { rand = rand1, food = coord }
   where
-    width = length $ head level
-    height = length level
-    
-    mapFst f (a, b) = (f a, b)
-    mapSnd f (a, b) = (a, f b)
-    mapBoth f (a, b) = (f a, f b)
-    rands = map (map) map (mapBoth abs) $ drop 1 $ iterate (random.snd) ((0, 0), rand)
-    
-    (randW, rand1) = map (mapFst (`mod` width)) rands
-    randsH = filter (<height.fst) $ snd rands
-    randPairs = filter validPos $ zip randsW randsH
-    validPos pos = 
+    freeGridCoords :: [Pos]
+    freeGridCoords = concat $ map toCoords $ zip [0 ..] $ map (elemIndices FREE) level
+    toCoords (x, ys) = map ((,)x) ys
 
-changeDir :: GameState -> Direction -> GameState
+    possibleCoords :: [Pos]
+    possibleCoords = filter (not.(flip elem snake)) freeGridCoords
+    len = length possibleCoords
+    
+    (idx, rand1) = randomR (0, len) rand
+    coord = possibleCoords !! idx
+
+changeDir :: GameState -> Dir -> GameState
 changeDir gameState dir = gameState { dir = dir }
