@@ -39,7 +39,15 @@ initialGuiState = LevelSelect levels 0
           "#  ####  #",
           "#        #",
           "##########"
-        ], [(1, 1), (1, 2)], DOWN)
+        ], [(2, 1), (1, 1)], DOWN),
+        (readLevel $ [
+          "##########################################",
+          "                                          ",
+          "                                          ",
+          "                                          ",
+          "##########################################"
+        ], [(1, 1)], DOWN)
+        
       ]
     readLevel :: [String] -> Grid
     readLevel = map (map readCell)
@@ -69,8 +77,8 @@ renderGrid :: Grid -> Snake -> [Pos] -> Picture
 renderGrid grid snake food
   = pictures $
     map (convertToPicture black) wallCoords ++
-    map (convertToPicture blue) swapCoords ++
-    map (convertToPicture red) (map swapCoords food)
+    map (convertToPicture blue) snake ++
+    map (convertToPicture red) food
   where
     wallCoords :: [Pos]
     wallCoords = map swapCoords $ concat $ map toCoords $ zip [0 ..] $ map (elemIndices WALL) grid
@@ -139,5 +147,5 @@ handleKeys (EventKey (SpecialKey KeySpace) Down _ _) guiState@LevelSelect { idx,
 handleKeys _ gameState = gameState
 
 main :: IO ()
-main = play window background 1 initialGuiState render handleKeys update
+main = play window background 2 initialGuiState render handleKeys update
 

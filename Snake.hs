@@ -24,7 +24,7 @@ data GameState = GameState
   }
 
 getCell :: Grid -> Pos -> Cell
-getCell grid (x, y) = grid !! y !! x
+getCell grid (x, y) = grid !! x !! y
 
 isRunning :: GameState -> Bool
 isRunning GameState { state }
@@ -80,7 +80,7 @@ generateFood gameState@GameState { rand, level, snake }
     possibleCoords = filter (not.(flip elem snake)) freeGridCoords
     len = length possibleCoords
     
-    (idx, rand1) = randomR (0, len) rand
+    (idx, rand1) = randomR (0, len - 1) rand
     coord = possibleCoords !! idx
 
 changeDir :: GameState -> Dir -> GameState
