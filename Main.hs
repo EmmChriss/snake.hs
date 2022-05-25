@@ -76,12 +76,12 @@ render Game { gameState } = renderGame gameState
 renderGrid :: Grid -> Snake -> [Pos] -> Picture
 renderGrid grid snake food
   = pictures $
-    map (convertToPicture black) wallCoords ++
+    map (convertToPicture black.swapCoords) wallCoords ++
     map (convertToPicture blue) snake ++
     map (convertToPicture red) food
   where
     wallCoords :: [Pos]
-    wallCoords = map swapCoords $ concat $ map toCoords $ zip [0 ..] $ map (elemIndices WALL) grid
+    wallCoords = concat $ map toCoords $ zip [0 ..] $ map (elemIndices WALL) grid
     toCoords (x, ys) = map ((,)x) ys
     swapCoords (x, y) = (y, x)
   

@@ -73,8 +73,9 @@ generateFood gameState@GameState { rand, level, snake }
   | otherwise = gameState { rand = rand1, food = coord }
   where
     freeGridCoords :: [Pos]
-    freeGridCoords = concat $ map toCoords $ zip [0 ..] $ map (elemIndices FREE) level
+    freeGridCoords = map swapCoords $ concat $ map toCoords $ zip [0 ..] $ map (elemIndices FREE) level
     toCoords (x, ys) = map ((,)x) ys
+    swapCoords (x, y) = (y, x)
 
     possibleCoords :: [Pos]
     possibleCoords = filter (not.(flip elem snake)) freeGridCoords
